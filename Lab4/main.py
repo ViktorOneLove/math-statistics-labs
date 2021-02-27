@@ -1,4 +1,4 @@
-from distribution import Distribution
+from distribution_characteristics import DistributionCharacteristics
 import matplotlib.pyplot as plt
 from statsmodels.distributions.empirical_distribution import ECDF
 import numpy as np
