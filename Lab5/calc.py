@@ -3,6 +3,7 @@ import scipy.stats as stats
 import statistics
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+from ellipse import Ellipse as classEllipse
 from sample_correlation_coefficients  import SampleCorrelationCoefficients as scc
 
 
@@ -87,22 +88,23 @@ def equiprobability_ellipse(capacities):
         _, sp = plt.subplots(1, 3, figsize=(16, 6))
         for cor_cov, subplot in zip([0, 0.5, 0.9], sp):
             sample = stats.multivariate_normal.rvs([0, 0], [[1, cor_cov], [cor_cov, 1]], capacity)
+
             x = sample[:, 0]
             y = sample[:, 1]
-            vx = statistics.variance(x)
-            vy = statistics.variance(y)
-            angle = np.arctan(2 * np.sqrt(vx) * np.sqrt(vy) * cor_cov / (vx - vy)) / 2
-            w = 5 * np.sqrt(vx * (np.cos(angle)) ** 2 + cor_cov * np.sqrt(vx) * np.sqrt(vy) * np.sin(2 * angle) + vy * (
-                np.sin(angle)) ** 2)
-            h = 5 * np.sqrt(vx * (np.sin(angle)) ** 2 - cor_cov * np.sqrt(vx) * np.sqrt(vy) * np.sin(2 * angle) + vy * (
-                np.cos(angle)) ** 2)
-            ell = Ellipse(xy=(np.mean(x), np.mean(y)), width=w, height=h,
-                          angle=np.rad2deg(angle), fill=False)
+
+            ellipse = classEllipse(0, 0,
+                              1, 1, cor_cov)
 
             subplot.scatter(x, y)
-            subplot.add_patch(ell)
 
-            title = f"n = {capacity} rho = {cor_cov}"
+            x = np.linspace(min(x) - 2, max(x) + 2, 100)
+            y = np.linspace(min(y) - 2, max(y) + 2, 100)
+            x, y = np.meshgrid(x, y)
+            z = ellipse.z(x, y)
+            t = ellipse.rad2(sample)
+            subplot.contour(x, y, z, [ellipse.rad2(sample)])
+
+            title = f"n = {capacity} rho = {cor_cov} R = {ellipse.rad2(sample).__round__(3)}"
 
             subplot.set_title(title)
             subplot.set_xlabel("X")
